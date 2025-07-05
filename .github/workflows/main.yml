@@ -1,0 +1,41 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches:
+      - main
+      - demo-version
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Deploy to Vercel and Fetch Build Logs Only
+        run: |
+          echo "🛠 Branch triggered: ${{ github.ref_name }}"
+
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            echo "🚀 Deploying MAIN branch to PRODUCTION environment..."
+            DEPLOY_URL=$(vercel --token ${{ secrets.VERCEL_TOKEN }} --prod --yes)
+          elif [[ "${{ github.ref_name }}" == "demo-version" ]]; then
+            echo "⚡ Deploying DEMO-VERSION branch (as Preview deployment)..."
+            DEPLOY_URL=$(vercel --token ${{ secrets.VERCEL_TOKEN }} --yes)
+          else
+            echo "❌ This branch is not configured for deployment."
+            exit 1
+          fi
+
+          echo "✅ Deployed to $DEPLOY_URL"
+
+          # Extract the deployment ID (last part of inspect URL)
+          DEPLOY_ID=$(basename "$DEPLOY_URL")
+          echo "📦 Fetching logs for deployment ID: $DEPLOY_ID"
+
+          # Fetch only build logs
+          vercel inspect --logs "$DEPLOY_ID" --token ${{ secrets.VERCEL_TOKEN }}
