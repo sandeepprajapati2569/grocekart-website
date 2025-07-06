@@ -1,37 +1,42 @@
-import path from 'path'
-import fs from 'fs'
+import path from "path";
+import fs from "fs";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  output: "export",
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
+        protocol: "https",
         hostname: new URL(process.env.NEXT_PUBLIC_API_URL).hostname,
-        port: '',
-        pathname: '/storage/**',
+        port: "",
+        pathname: "/storage/**",
       },
       {
-        protocol: 'https',
+        protocol: "https",
         hostname: new URL(process.env.NEXT_PUBLIC_API_URL).hostname,
-        port: '',
-        pathname: '/public/storage/**',
-      }
+        port: "",
+        pathname: "/public/storage/**",
+      },
     ],
-    unoptimized: true
+    unoptimized: true,
   },
   reactStrictMode: false,
   experimental: {
     scrollRestoration: true,
+    workerThreads: false, // ✅ Prevent memory-heavy parallelism
+    cpus: 1,
   },
   async exportPathMap(defaultPathMap, { dev, dir, outDir, distDir, buildId }) {
-    if (dir && outDir && fs.existsSync(path.join(dir, '.htaccess'))) {
-      fs.copyFileSync(path.join(dir, '.htaccess'), path.join(outDir, '.htaccess'))
+    if (dir && outDir && fs.existsSync(path.join(dir, ".htaccess"))) {
+      fs.copyFileSync(
+        path.join(dir, ".htaccess"),
+        path.join(outDir, ".htaccess")
+      );
     } else {
       // console.log('No .htaccess file found')
     }
-    return defaultPathMap
-  }
+    return defaultPathMap;
+  },
 };
 
 export default nextConfig;
